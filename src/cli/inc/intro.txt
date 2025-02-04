@@ -1,0 +1,36 @@
+
+---------------------------------------------------------------------------------------------------
+
+⚡ CLI TOOL
+
+---------------------------------------------------------------------------------------------------
+
+INTRODUCTION:
+  This CLI TOOL was written in zig.
+  The create of the project was done whilst learning the zig language.
+  This CLI TOOL works by passing space separated arguments.
+    First =>  The COMMAND is passed.
+    Second => The FUNCTION is passed in preceded by a '-', i.e. '-help'.
+    Rest => The remaining arguments and the FUNCTION ARGS are passed in, if desired, preceded by a
+      '--', i.e. '--port=[VALUE]' 
+  
+  Example: http -start --port=4221 --host=127.0.0.1
+
+---------------------------------------------------------------------------------------------------
+
+COMMANDS:
+  Here the available COMMANDS and a brief description:
+    help => Displays the CLI TOOL's help file.
+    exit => Kills the session.
+    b64  => Encrypts and Decrypts text to base64 and vice versa.
+    http => Starts up the HTTP/1.1 server.
+    file => Handles file and directory manipulation .
+
+---------------------------------------------------------------------------------------------------
+
+DETAILS:
+  Author: David Charles
+  Version: 0.0.1
+  GitHub: 
+
+---------------------------------------------------------------------------------------------------
