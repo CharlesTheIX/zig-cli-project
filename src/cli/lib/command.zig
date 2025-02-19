@@ -5,14 +5,16 @@ const exit = @import("./exit.zig");
 const file = @import("./file.zig");
 const http = @import("./http.zig");
 const b64 = @import("./base64.zig");
+const games = @import("./games.zig");
 const stdout = std.io.getStdOut().writer();
 
-const Command = enum { Help, Exit, File, Http, Base64, Invalid };
+const Command = enum { Help, Exit, File, Http, Games, Base64, Invalid };
 
 pub fn controller(command: []const u8, args: []const u8) !void {
     const commandType = stringToCommand(command);
     switch (commandType) {
         .Help => try help(),
+        .Games => try games.controller(),
         .Exit => try exit.controller(0),
         .File => try file.controller(args),
         .Http => try http.controller(args),
@@ -23,10 +25,11 @@ pub fn controller(command: []const u8, args: []const u8) !void {
 
 pub fn stringToCommand(string: []const u8) Command {
     if (mem.eql(u8, string, "help")) return .Help;
-    if (mem.eql(u8, string, "exit")) return .Exit;
     if (mem.eql(u8, string, "file")) return .File;
     if (mem.eql(u8, string, "http")) return .Http;
     if (mem.eql(u8, string, "b64")) return .Base64;
+    if (mem.eql(u8, string, "games")) return .Games;
+    if (mem.eql(u8, string, "exit") or mem.eql(u8, string, ":q")) return .Exit;
     return .Invalid;
 }
 
