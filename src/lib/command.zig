@@ -5,7 +5,7 @@ const file = @import("./file.zig");
 const http = @import("./http.zig");
 const b64 = @import("./base64.zig");
 const games = @import("./games.zig");
-const sc = @import("./helpers/shellCommands.zig");
+const sc = @import("./helpers/shell-commands.zig");
 
 const Command = enum { Help, Todo, Exit, File, Http, Games, Base64, Invalid };
 

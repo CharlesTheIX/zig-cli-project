@@ -1,7 +1,7 @@
 const fs = std.fs;
 const mem = std.mem;
 const std = @import("std");
-const sc = @import("./helpers/shellCommands.zig");
+const sc = @import("./helpers/shell-commands.zig");
 const stdin = std.io.getStdIn().reader();
 const stdout = std.io.getStdOut().writer();
 
@@ -71,9 +71,13 @@ fn read(args: []const u8) !void {
         } else continue;
     }
 
-    if (path.len == 0) return try stdout.print("Argument Required: --path\n", .{});
+    while (path.len == 0) {
+        var buffer: [1024]u8 = undefined;
+        try stdout.print("\x1b[32mPath ⚡\x1b[0m ", .{});
+        path = try stdin.readUntilDelimiter(&buffer, '\n');
+    }
 
-    const file_type = getFileType(path);
+    const file_type = stringToFileType(path);
 
     if (file_type == .Invalid) return try stdout.print("Invalid File Type.\n", .{});
 
@@ -100,7 +104,7 @@ fn read(args: []const u8) !void {
 fn write(args: []const u8) !void {
     var arg_parts = mem.splitSequence(u8, args, " ");
     var path: []const u8 = "";
-    var editor = Editor.Nvim;
+    var editor = Editor.Invalid;
 
     while (arg_parts.next()) |part| {
         if (mem.eql(u8, part, "") or part.len == 1) break;
@@ -111,13 +115,25 @@ fn write(args: []const u8) !void {
             const value = key_value.rest();
 
             if (mem.eql(u8, key, "--path") or mem.eql(u8, key, "--p")) path = value;
-            if (mem.eql(u8, key, "--editor") or mem.eql(u8, key, "--e")) editor = getEditor(value);
+            if (mem.eql(u8, key, "--editor") or mem.eql(u8, key, "--e")) editor = stringToEditor(value);
         } else continue;
     }
 
-    if (path.len == 0) return try stdout.print("Argument Required: --path\n", .{});
+    while (path.len == 0) {
+        var buffer: [1024]u8 = undefined;
+        try stdout.print("\x1b[32mPath ⚡\x1b[0m ", .{});
+        path = try stdin.readUntilDelimiter(&buffer, '\n');
+    }
 
-    const file_type = getFileType(path);
+    while (editor == .Invalid) {
+        var buffer: [1024]u8 = undefined;
+        try stdout.print("\x1b[32mEditor (nvim) ⚡\x1b[0m ", .{});
+        const editor_input = try stdin.readUntilDelimiter(&buffer, '\n');
+
+        if (editor_input.len == 0) editor = .Nvim;
+    }
+
+    const file_type = stringToFileType(path);
 
     if (file_type == .Invalid) return try stdout.print("Invalid File Type\n", .{});
 
@@ -128,7 +144,7 @@ fn write(args: []const u8) !void {
 fn update(args: []const u8) !void {
     var arg_parts = mem.splitSequence(u8, args, " ");
     var path: []const u8 = "";
-    var editor = Editor.Nvim;
+    var editor = Editor.Invalid;
 
     while (arg_parts.next()) |part| {
         if (mem.eql(u8, part, "")) break;
@@ -139,13 +155,25 @@ fn update(args: []const u8) !void {
             const value = key_value.rest();
 
             if (mem.eql(u8, key, "--path") or mem.eql(u8, key, "--p")) path = value;
-            if (mem.eql(u8, key, "--editor") or mem.eql(u8, key, "--e")) editor = getEditor(value);
+            if (mem.eql(u8, key, "--editor") or mem.eql(u8, key, "--e")) editor = stringToEditor(value);
         } else continue;
     }
 
-    if (path.len == 0) return try stdout.print("Argument Required: --path\n", .{});
+    while (path.len == 0) {
+        var buffer: [1024]u8 = undefined;
+        try stdout.print("\x1b[32mPath ⚡\x1b[0m ", .{});
+        path = try stdin.readUntilDelimiter(&buffer, '\n');
+    }
 
-    const file_type = getFileType(path);
+    while (editor == .Invalid) {
+        var buffer: [1024]u8 = undefined;
+        try stdout.print("\x1b[32mEditor (nvim) ⚡\x1b[0m ", .{});
+        const editor_input = try stdin.readUntilDelimiter(&buffer, '\n');
+
+        if (editor_input.len == 0) editor = .Nvim;
+    }
+
+    const file_type = stringToFileType(path);
 
     if (file_type == .Invalid) return try stdout.print("Invalid File Type.\n", .{});
 
@@ -169,9 +197,13 @@ fn delete(args: []const u8) !void {
         } else continue;
     }
 
-    if (path.len == 0) return try stdout.print("Required Arguments: --path\n", .{});
+    while (path.len == 0) {
+        var buffer: [1024]u8 = undefined;
+        try stdout.print("\x1b[32mPath ⚡\x1b[0m ", .{});
+        path = try stdin.readUntilDelimiter(&buffer, '\n');
+    }
 
-    const file_type = getFileType(path);
+    const file_type = stringToFileType(path);
 
     if (file_type == .Invalid) return try stdout.print("Invalid File Type.\n", .{});
 
@@ -199,10 +231,19 @@ fn copy(args: []const u8) !void {
             if (mem.eql(u8, key, "--to") or mem.eql(u8, key, "--t")) to = value;
         } else continue;
     }
+    while (from.len == 0) {
+        var buffer: [1024]u8 = undefined;
+        try stdout.print("\x1b[32mFrom ⚡\x1b[0m ", .{});
+        from = try stdin.readUntilDelimiter(&buffer, '\n');
+    }
 
-    if (from.len == 0 or to.len == 0) return try stdout.print("Argument Required: --from --to\n", .{});
+    while (to.len == 0) {
+        var buffer: [1024]u8 = undefined;
+        try stdout.print("\x1b[32mTo ⚡\x1b[0m ", .{});
+        to = try stdin.readUntilDelimiter(&buffer, '\n');
+    }
 
-    const file_type = getFileType(from);
+    const file_type = stringToFileType(from);
 
     if (file_type == .Invalid) return try stdout.print("Invalid File Type.\n", .{});
 
@@ -214,10 +255,10 @@ fn copy(args: []const u8) !void {
     try stdout.print("File copied:\nfrom: {s}\nto: {s}\n", .{ abs_from_path, abs_to_path });
 }
 
-fn getFileType(path: []const u8) FileType {
-    if (path.len == 0) return .Invalid;
+fn stringToFileType(string: []const u8) FileType {
+    if (string.len == 0) return .Invalid;
 
-    var path_parts = mem.splitSequence(u8, path, "/");
+    var path_parts = mem.splitSequence(u8, string, "/");
     var file_name: []const u8 = undefined;
 
     while (path_parts.next()) |part| file_name = part;
@@ -233,8 +274,8 @@ fn getFileType(path: []const u8) FileType {
     return .Invalid;
 }
 
-fn getEditor(editor: []const u8) Editor {
-    _ = editor;
+fn stringToEditor(string: []const u8) Editor {
+    _ = string;
     return .Nvim;
 }
 

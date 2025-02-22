@@ -1,7 +1,7 @@
 const std = @import("std");
 const file = @import("./lib/file.zig");
 const cmd = @import("./lib/command.zig");
-const sc = @import("./lib/helpers/shellCommands.zig");
+const sc = @import("./lib/helpers/shell-commands.zig");
 
 pub fn main() !void {
     var buffer: [1024]u8 = undefined;

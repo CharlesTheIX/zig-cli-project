@@ -2,7 +2,7 @@ const mem = std.mem;
 const std = @import("std");
 const pong = @import("./pong/main.zig");
 const file = @import("../../lib/file.zig");
-const sc = @import("../../lib/helpers/shellCommands.zig");
+const sc = @import("../../lib/helpers/shell-commands.zig");
 
 pub const Game = enum { Help, Todo, List, Pong, Invalid };
 
