@@ -6,20 +6,11 @@ const rand = @import("../helpers/random.zig");
 pub const Ball = struct {
     radius: f32,
     color: rl.Color,
-    velocity: rl.Vector2,
     position: rl.Vector2,
-
-    pub fn init() Ball {
-        const rand_velocity_x = @as(f32, @floatFromInt(rand.randomNumber(7, 10)));
-        const rand_velocity_y = @as(f32, @floatFromInt(rand.randomNumber(2, 7)));
-
-        return Ball{
-            .radius = 10,
-            .color = rl.Color.green,
-            .position = rl.Vector2.init(400, 210),
-            .velocity = rl.Vector2.init(rand_velocity_x, rand_velocity_y),
-        };
-    }
+    velocity: rl.Vector2,
+    min_velocity: rl.Vector2,
+    max_velocity: rl.Vector2,
+    acceleration: rl.Vector2,
 
     pub fn draw(self: Ball) void {
         rl.drawCircle(
@@ -37,8 +28,8 @@ pub const Ball = struct {
         const window_bottom = @as(i32, @intFromFloat(self.position.y + self.radius)) >= rl.getScreenHeight();
 
         if (window_left or window_right) {
-            if (window_right) game.*.players.*[0].*.score += 1;
-            if (window_left) game.*.players.*[1].*.score += 1;
+            if (window_right) game.*.players[0].*.score += 1;
+            if (window_left) game.*.players[1].*.score += 1;
 
             game.*.rally_count = 0;
             self.position.x = 400;
@@ -61,3 +52,26 @@ pub const Ball = struct {
         self.position.y += self.velocity.y;
     }
 };
+
+pub fn createBall(position: rl.Vector2, radius: u32) Ball {
+    const min_velocity = rl.Vector2.init(7, 2);
+    const max_velocity = rl.Vector2.init(10, 7);
+    const rand_velocity_x = @as(f32, @floatFromInt(rand.randomNumber(
+        @as(i32, @intFromFloat(min_velocity.x)),
+        @as(i32, @intFromFloat(max_velocity.x)),
+    )));
+    const rand_velocity_y = @as(f32, @floatFromInt(rand.randomNumber(
+        @as(i32, @intFromFloat(min_velocity.y)),
+        @as(i32, @intFromFloat(max_velocity.y)),
+    )));
+
+    return Ball{
+        .position = position,
+        .color = rl.Color.green,
+        .min_velocity = min_velocity,
+        .max_velocity = max_velocity,
+        .radius = @as(f32, @floatFromInt(radius)),
+        .acceleration = rl.Vector2.init(0, 0),
+        .velocity = rl.Vector2.init(rand_velocity_x, rand_velocity_y),
+    };
+}

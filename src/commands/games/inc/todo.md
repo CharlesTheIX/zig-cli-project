@@ -8,5 +8,11 @@
 -------------------------------------------------------------------------------
 LAST REVIEWED | 21/02/25
 
+## GENERAL
 complete the games list
+
+## PONG
+
+add buttons to the game
+add acceleration to the game
 -------------------------------------------------------------------------------

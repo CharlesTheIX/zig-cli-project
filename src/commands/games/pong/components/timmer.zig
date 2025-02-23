@@ -8,23 +8,6 @@ pub const Timmer = struct {
     font_size: u10,
     position: rl.Vector2,
 
-    pub fn init(x: f32, y: f32, hidden: bool) Timmer {
-        return Timmer{
-            .time = 0,
-            .count = 0,
-            .font_size = 36,
-            .hidden = hidden,
-            .position = rl.Vector2.init(x, y),
-        };
-    }
-
-    pub fn update(self: *Timmer) void {
-        self.count += 1;
-        if (self.count + 1 <= 60) return;
-        self.count = 0;
-        self.time += 1;
-    }
-
     pub fn draw(self: Timmer) !void {
         if (self.hidden) return;
 
@@ -38,4 +21,21 @@ pub const Timmer = struct {
 
         rl.drawText(timmer, delta_timmer_x, delta_timmer_y, self.font_size, rl.Color.white);
     }
+
+    pub fn update(self: *Timmer) void {
+        self.count += 1;
+        if (self.count + 1 <= 60) return;
+        self.count = 0;
+        self.time += 1;
+    }
 };
+
+pub fn createTimmer(x: f32, y: f32, hidden: bool) Timmer {
+    return Timmer{
+        .time = 0,
+        .count = 0,
+        .font_size = 36,
+        .hidden = hidden,
+        .position = rl.Vector2.init(x, y),
+    };
+}
