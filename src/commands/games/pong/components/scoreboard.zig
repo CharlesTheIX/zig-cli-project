@@ -59,7 +59,7 @@ pub const Scoreboard = struct {
         }
     }
 
-    fn drawTimmer(self: *Scoreboard) !void {
+    fn drawTimmer(self: Scoreboard) !void {
         try self.timmer.draw();
     }
 };

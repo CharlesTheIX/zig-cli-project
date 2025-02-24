@@ -11,7 +11,6 @@ pub const Route = enum { Health, PgTables, Echo, Test, NotFound };
 pub const Method = enum { GET, POST, PUT, PATCH, DELETE, HEAD, OPTIONS, TRACE, CONNECT, Invalid };
 
 pub fn controller(connection: net.Server.Connection, request: []const u8, header: []const u8, body: ?[]const u8) !void {
-    try std.io.getStdOut().writer().print("body: {s}\n", .{body.?});
     var request_parts = mem.splitSequence(u8, request, " ");
     const method = stringToMethod(request_parts.next());
     const target = request_parts.next();

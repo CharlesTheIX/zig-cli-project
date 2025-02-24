@@ -4,6 +4,7 @@ const gm = @import("./game.zig");
 
 pub const PlayerType = enum { Human, Cpu, Inactive };
 pub const Option = enum { One, Two, Three, Four, Invalid };
+const CollisionSide = enum { Top, Bottom, Left, Right, Invalid };
 
 pub const Player = struct {
     score: u32,
@@ -29,13 +30,13 @@ pub const Player = struct {
         );
     }
 
-    pub fn update(self: *Player, game: *gm.Game) !void {
+    pub fn update(self: *Player, game: *gm.Game) void {
         switch (self.player_type) {
             .Human => {
                 handlePlayerMovement(self);
             },
             .Cpu => {
-                try handleCpuMovement(self, game);
+                handleCpuMovement(self, game);
             },
             .Inactive => return,
         }
@@ -43,32 +44,53 @@ pub const Player = struct {
         handleBallCollision(self.*, game);
     }
 
-    fn handleBallCollision(self: Player, game: *gm.Game) void {
+    fn getCollisionSide(self: Player, game: *gm.Game) CollisionSide {
         const collision = rl.checkCollisionCircleRec(
             game.*.ball.position,
             game.*.ball.radius,
             self.body,
         );
 
-        if (!collision) return;
+        if (!collision) return .Invalid;
 
-        const direction_up = game.*.ball.velocity.y > 0 and game.*.ball.position.y < self.body.y;
-        const direction_down = game.*.ball.velocity.y < 0 and game.*.ball.position.y > self.body.y + self.body.height;
-        const direction_left = game.*.ball.velocity.x > 0 and game.*.ball.position.x < self.body.x;
-        const direction_right = game.*.ball.velocity.x < 0 and game.*.ball.position.x > self.body.x + self.body.width;
+        const top = game.*.ball.velocity.y > 0 and game.*.ball.position.y < self.body.y;
+        const bottom = game.*.ball.velocity.y < 0 and game.*.ball.position.y > self.body.y + self.body.height;
+        const left = game.*.ball.velocity.x > 0 and game.*.ball.position.x < self.body.x;
+        const right = game.*.ball.velocity.x < 0 and game.*.ball.position.x > self.body.x + self.body.width;
 
-        if (direction_up or direction_down) game.*.ball.velocity.y *= -1;
+        if (top) return .Top;
+        if (bottom) return .Bottom;
+        if (left) return .Left;
+        if (right) return .Right;
 
-        if (direction_left or direction_right) game.*.ball.velocity.x *= -1;
-
-        game.*.rally_count += 1;
+        return .Invalid;
     }
 
-    fn handleCpuMovement(self: *Player, game: *gm.Game) !void {
+    fn handleBallCollision(self: Player, game: *gm.Game) void {
+        const collision_side = getCollisionSide(self, game);
+
+        switch (collision_side) {
+            .Top => {
+                game.*.ball.velocity.y *= -1;
+            },
+            .Bottom => {
+                game.*.ball.velocity.y *= -1;
+            },
+            .Left => {
+                game.*.ball.velocity.x *= -1;
+                game.*.rally_count += 1;
+            },
+            .Right => {
+                game.*.ball.velocity.x *= -1;
+                game.*.rally_count += 1;
+            },
+            .Invalid => return,
+        }
+    }
+
+    fn handleCpuMovement(self: *Player, game: *gm.Game) void {
         self.velocity.x = 0;
         self.velocity.y = 0;
-
-        try std.io.getStdOut().writer().print("{d}, {d}\n", .{ self.body.y, game.*.ball.position.y });
 
         if (self.body.y + @divFloor(self.body.height, 2) > game.*.ball.position.y) {
             self.velocity.y = -5;
@@ -78,11 +100,7 @@ pub const Player = struct {
             self.body.y += self.velocity.y;
         }
 
-        if (self.body.y < 0) {
-            self.body.y = 0;
-        } else if (self.body.y + self.body.height >= 420) {
-            self.body.y = 420 - self.body.height;
-        }
+        handlePlayerOutOfBounds(self);
     }
 
     fn handlePlayerMovement(self: *Player) void {
@@ -92,16 +110,19 @@ pub const Player = struct {
         switch (self.option) {
             .One => {
                 if (rl.isKeyDown(.w)) {
-                    self.velocity.y = 5;
-                    self.body.y -= self.velocity.y;
+                    self.velocity.y = -5;
                 } else if (rl.isKeyDown(.s)) {
                     self.velocity.y = 5;
-                    self.body.y += self.velocity.y;
                 }
             },
             else => return,
         }
 
+        self.body.y += self.velocity.y;
+        handlePlayerOutOfBounds(self);
+    }
+
+    fn handlePlayerOutOfBounds(self: *Player) void {
         if (self.body.y < 0) {
             self.body.y = 0;
         } else if (self.body.y + self.body.height > 420) {

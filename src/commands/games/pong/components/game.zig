@@ -15,6 +15,7 @@ pub const Game = struct {
     ball: bl.Ball,
     rally_count: u32,
     serve_count: u32,
+    resistance: rl.Vector2,
     players: *[4]*ply.Player,
     start_button: btn.Button,
     background: bg.Background,
@@ -78,9 +79,9 @@ pub const Game = struct {
             return;
         }
 
+        try self.ball.update(self);
+        for (self.players.*) |p| p.*.update(self);
         try self.scoreboard.update();
-        for (self.players.*) |p| try p.*.update(self);
-        self.ball.update(self);
     }
 
     fn updateStartState(self: *Game) void {
@@ -104,6 +105,7 @@ pub fn createGame(players: *[4]*ply.Player) !Game {
         .start_button = start_button,
         .background = bg.createBackground(),
         .scoreboard = sb.createScoreboard(),
+        .resistance = rl.Vector2.init(1, 2),
         .ball = bl.createBall(rl.Vector2.init(400, 210), 10),
     };
 }
