@@ -2,9 +2,10 @@ const mem = std.mem;
 const std = @import("std");
 const pong = @import("./pong/main.zig");
 const file = @import("../../lib/file.zig");
+const ice_hockey = @import("./ice-hockey/main.zig");
 const sc = @import("../../lib/helpers/shell-commands.zig");
 
-pub const Game = enum { Help, Todo, List, Pong, Invalid };
+pub const Game = enum { Help, Todo, List, Pong, IceHockey, Invalid };
 
 pub fn init(game: Game) !void {
     switch (game) {
@@ -12,6 +13,7 @@ pub fn init(game: Game) !void {
         .Todo => return todo(),
         .List => return list(),
         .Pong => return pong.main(),
+        .IceHockey => return ice_hockey.main(),
         .Invalid => return try std.io.getStdOut().writer().print("Invalid GAME: Please use '-help' OR '-h' FUNCTION for HELP with this COMMAND\n", .{}),
     }
 }
@@ -19,6 +21,7 @@ pub fn init(game: Game) !void {
 pub fn stringToGame(string: []const u8) Game {
     if (mem.eql(u8, string, "-pong")) return .Pong;
     if (mem.eql(u8, string, "-todo")) return .Todo;
+    if (mem.eql(u8, string, "-ice-hockey")) return .IceHockey;
     if (mem.eql(u8, string, "-help") or mem.eql(u8, string, "-h")) return .Help;
     if (mem.eql(u8, string, "-list") or mem.eql(u8, string, "-l")) return .List;
     return .Invalid;
