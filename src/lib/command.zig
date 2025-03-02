@@ -5,9 +5,20 @@ const file = @import("./file.zig");
 const http = @import("./http.zig");
 const b64 = @import("./base64.zig");
 const games = @import("./games.zig");
+const bc = @import("./bit-controller.zig");
 const sc = @import("./helpers/shell-commands.zig");
 
-const Command = enum { Help, Todo, Exit, File, Http, Games, Base64, Invalid };
+const Command = enum {
+    Help,
+    Todo,
+    Exit,
+    File,
+    Http,
+    Games,
+    Base64,
+    BitController,
+    Invalid,
+};
 
 pub fn controller(command: []const u8, args: []const u8) !void {
     const commandType = stringToCommand(command);
@@ -19,6 +30,7 @@ pub fn controller(command: []const u8, args: []const u8) !void {
         .Http => try http.controller(args),
         .Base64 => try b64.controller(args),
         .Games => try games.controller(args),
+        .BitController => try bc.controller(args),
         .Invalid => try sc.shellCommands(command, args),
     }
 }
@@ -30,6 +42,7 @@ pub fn stringToCommand(string: []const u8) Command {
     if (mem.eql(u8, string, "http")) return .Http;
     if (mem.eql(u8, string, "b64")) return .Base64;
     if (mem.eql(u8, string, "games")) return .Games;
+    if (mem.eql(u8, string, "bc")) return .BitController;
     if (mem.eql(u8, string, "exit") or mem.eql(u8, string, ":q")) return .Exit;
     return .Invalid;
 }
